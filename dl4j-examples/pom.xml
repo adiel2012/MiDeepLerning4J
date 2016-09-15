@@ -65,7 +65,8 @@
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-core</artifactId>
-            <version>${dl4j.version}</version>
+            <version>0.0.3.4-SNAPSHOT</version>
+            <type>jar</type>
         </dependency>
 
         <dependency>
@@ -107,6 +108,12 @@
             <groupId>org.deeplearning4j</groupId>
             <artifactId>arbiter-deeplearning4j</artifactId>
             <version>${arbiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>cnova-nd4j-image</artifactId>
+            <version>0.0.0.1-SNAPSHOT</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
 
