@@ -51,7 +51,7 @@ public class Sample2 {
 
     public static void main(String[] args) {
         
-        // 
+        //  http://www.cs.toronto.edu/%7Ehinton/absps/guideTR.pdf 
         try {
             int nChannels = 3;
             
