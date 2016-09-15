@@ -46,7 +46,7 @@ public class LenetMnistExample {
                 .seed(seed)
                 .iterations(iterations)
                 .regularization(true).l2(0.0005)
-                .learningRate(0.0001)//.biasLearningRate(0.02)
+                .learningRate(0.01)//.biasLearningRate(0.02)
                 //.learningRateDecayPolicy(LearningRatePolicy.Inverse).lrPolicyDecayRate(0.001).lrPolicyPower(0.75)
                 .weightInit(WeightInit.XAVIER)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
