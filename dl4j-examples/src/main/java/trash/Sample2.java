@@ -24,7 +24,6 @@ import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
 import static org.deeplearning4j.examples.dataExamples.ImagePipelineExample.randNumGen;
-import static org.deeplearning4j.examples.feedforward.regression.RegressionMathFunctions.iterations;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -66,10 +65,11 @@ public class Sample2 {
             InputSplit trainData = filesInDirSplit[0];
             InputSplit testData = filesInDirSplit[1];
             
+            int tam = 28;
             
             
-            ImageRecordReader recordReader = new ImageRecordReader(28, 28, nChannels, labelMaker);
-        int outputNum = 5749;
+            ImageRecordReader recordReader = new ImageRecordReader(tam, tam, nChannels, labelMaker);
+        int outputNum = 20; // 5749;
         
 
             
@@ -77,7 +77,7 @@ public class Sample2 {
             
             int fff =         recordReader.next().size();
             
-            DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 28*28*nChannels+1, outputNum);
+            DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, tam*tam*nChannels, outputNum);
             
             int contador = 0;
 //            while (dataIter.hasNext()) {
@@ -90,12 +90,13 @@ public class Sample2 {
             
             System.out.println("Num Clases: "+dataIter.getLabels().size());
             int seed = 0;
+            int iterations = 1000;
             
             
             
             
             
-        
+             
             
             
             MultiLayerConfiguration.Builder builder = new NeuralNetConfiguration.Builder()
@@ -106,11 +107,11 @@ public class Sample2 {
                 //.learningRateDecayPolicy(LearningRatePolicy.Inverse).lrPolicyDecayRate(0.001).lrPolicyPower(0.75)
                 .weightInit(WeightInit.XAVIER)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .updater(Updater.NESTEROVS).momentum(0.9)
+                .updater(Updater.NESTEROVS).momentum(0.1)
                 .list()
                 .layer(0, new ConvolutionLayer.Builder(5, 5)
                         //nIn and nOut specify depth. nIn here is the nChannels and nOut is the number of filters to be applied
-                        .nIn(nChannels)
+                        .nIn(tam*tam)
                         .stride(1, 1)
                         .nOut(20)
                         .activation("identity")
@@ -131,13 +132,13 @@ public class Sample2 {
                         .build())
                 .layer(4, new DenseLayer.Builder().activation("relu")
                         .nOut(500).build())
-                .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
                         .nOut(outputNum)
                         .activation("softmax")
                         .build())
                 .backprop(true).pretrain(false);
         // The builder needs the dimensions of the image along with the number of channels. these are 28x28 images in one channel
-        new ConvolutionLayerSetup(builder,28,28,nChannels);
+        new ConvolutionLayerSetup(builder,tam,tam,nChannels);
 
         MultiLayerConfiguration conf = builder.build();
         MultiLayerNetwork model = new MultiLayerNetwork(conf);

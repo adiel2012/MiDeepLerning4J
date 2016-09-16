@@ -42,7 +42,7 @@ public class RegressionMathFunctions {
     //Random number generator seed, for reproducability
     public static final int seed = 12345;
     //Number of iterations per minibatch
-    public static final int iterations = 1;
+    public static final int iterations = 10;
     //Number of epochs (full passes of the data)
     public static final int nEpochs = 2000;
     //How frequently should we plot the network output?
