@@ -55,7 +55,7 @@ public class Sample2 {
         try {
             int nChannels = 3;
             
-            File parentDir = new File("C:\\Users\\acastano\\Downloads\\lfw\\lfw\\lfw");
+            File parentDir = new File("C:\\Users\\acastano\\Downloads\\lfw");
             String[] allowedExtensions = new String[]{"jpg"};
             FileSplit filesInDir = new FileSplit(parentDir, allowedExtensions, randNumGen);
             ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
@@ -67,16 +67,24 @@ public class Sample2 {
             InputSplit testData = filesInDirSplit[1];
             
             
+            
             ImageRecordReader recordReader = new ImageRecordReader(28, 28, nChannels, labelMaker);
         int outputNum = 5749;
+        
+
             
             recordReader.initialize(trainData);
-            DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 784, outputNum);
+            
+            int fff =         recordReader.next().size();
+            
+            DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 28*28*nChannels+1, outputNum);
             
             int contador = 0;
 //            while (dataIter.hasNext()) {
 //               DataSet ds =  dataIter.next();
-//               System.out.println(ds);
+//               
+//               System.out.println(ds.numExamples());
+//              // System.out.println(ds.numInputs());
 //                contador++;                
 //            }
             
@@ -129,7 +137,7 @@ public class Sample2 {
                         .build())
                 .backprop(true).pretrain(false);
         // The builder needs the dimensions of the image along with the number of channels. these are 28x28 images in one channel
-        new ConvolutionLayerSetup(builder,28,28,1);
+        new ConvolutionLayerSetup(builder,28,28,nChannels);
 
         MultiLayerConfiguration conf = builder.build();
         MultiLayerNetwork model = new MultiLayerNetwork(conf);

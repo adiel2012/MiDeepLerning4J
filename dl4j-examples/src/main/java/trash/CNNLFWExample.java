@@ -85,7 +85,7 @@ public class CNNLFWExample {
             int outputNum = 5749;
             
             recordReader.initialize(trainData);
-            org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 784, outputNum);
+            org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 28 * 28 * nChannels+1, outputNum);
             
             int contador = 0;
 //            while (dataIter.hasNext()) {
