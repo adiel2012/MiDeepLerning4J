@@ -108,6 +108,11 @@
             <artifactId>arbiter-deeplearning4j</artifactId>
             <version>${arbiter.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>canova-nd4j-image</artifactId>
+            <version>0.0.0.17</version>
+        </dependency>
     </dependencies>
 
     <build>
