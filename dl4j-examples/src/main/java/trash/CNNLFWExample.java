@@ -49,6 +49,7 @@ import org.datavec.image.recordreader.ImageRecordReader;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import static org.deeplearning4j.examples.dataExamples.ImagePipelineExample.randNumGen;
 import static org.deeplearning4j.examples.feedforward.regression.RegressionMathFunctions.iterations;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.factory.Nd4j;
 
 /**
@@ -69,7 +70,7 @@ public class CNNLFWExample {
             
             
              int batchSize = 30;   // numSamples/10;
-            int iterations = 500;
+            int iterations = 50;
             int splitTrainNum = (int) (batchSize * .8);
 //            int seed = 123;
             int listenerFreq = iterations / 5;
@@ -105,7 +106,7 @@ public class CNNLFWExample {
             int classposition = -1;   //numRows * numColumns * nChannels+200000;
             
             org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, classposition, outputNum);
-            org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIterTest = new RecordReaderDataSetIterator(recordReader, batchSize, classposition, outputNum);
+            org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIterTest = new RecordReaderDataSetIterator(recordReaderTest, batchSize, classposition, outputNum);
 
             System.out.println("Num Clases: " + dataIter.getLabels().size());
             int seed = 0;
@@ -189,11 +190,14 @@ public class CNNLFWExample {
 
 //        log.info("Train model....");
             model.setListeners(new ScoreIterationListener(1));
-            int nEpochs = 2;
+            int nEpochs = 1;
 
             Nd4j.ENFORCE_NUMERICAL_STABILITY = true;
             for (int i = 0; i < nEpochs; i++) {
                 model.fit(dataIter);
+                
+                
+               // saveModel(model,"mimodelo.txt");
 
                 Evaluation eval = new Evaluation(outputNum);
                 dataIterTest.reset();
@@ -210,6 +214,22 @@ public class CNNLFWExample {
         } catch (IOException ex) {
             java.util.logging.Logger.getLogger(CNNLFWExample.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+    }
+
+    private static void saveModel(MultiLayerNetwork model, String mimodelotxt) {
+        try {
+            File f = new File(mimodelotxt);
+            ModelSerializer.writeModel(model, f, true);
+            
+            // https://github.com/deeplearning4j/deeplearning4j/blob/master/deeplearning4j-core/src/test/java/org/deeplearning4j/util/ModelSerializerTest.java
+            
+//       ModelSerializer.writeModel(net, tempFile, true);
+//MultiLayerNetwork network = ModelSerializer.restoreMultiLayerNetwork(tempFile);
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(CNNLFWExample.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
 
     }
 
