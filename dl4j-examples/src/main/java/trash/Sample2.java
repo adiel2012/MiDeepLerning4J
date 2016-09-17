@@ -67,17 +67,15 @@ public class Sample2 {
             
             int tam = 28;
             
-            
+            int outputNum = 20; // 5749;
             ImageRecordReader recordReader = new ImageRecordReader(tam, tam, nChannels, labelMaker);
-        int outputNum = 20; // 5749;
-        
-
-            
             recordReader.initialize(trainData);
+            ImageRecordReader recordReaderTest = new ImageRecordReader(tam, tam, nChannels, labelMaker);
+            recordReaderTest.initialize(testData);
             
-            int fff =         recordReader.next().size();
             
             DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, tam*tam*nChannels, outputNum);
+            DataSetIterator dataIterTest = new RecordReaderDataSetIterator(recordReaderTest, 10, tam*tam*nChannels, outputNum);
             
             int contador = 0;
 //            while (dataIter.hasNext()) {
@@ -152,17 +150,15 @@ public class Sample2 {
             Nd4j.ENFORCE_NUMERICAL_STABILITY = true;
         for( int i=0; i<nEpochs; i++ ) {
             model.fit(dataIter);
-//            log.info("*** Completed epoch {} ***", i);
-//
-//            log.info("Evaluate model....");
-//            Evaluation eval = new Evaluation(outputNum);
-//            while(mnistTest.hasNext()){
-//                DataSet ds = mnistTest.next();
-//                INDArray output = model.output(ds.getFeatureMatrix(), false);
-//                eval.eval(ds.getLabels(), output);
-//            }
-//            log.info(eval.stats());
-//            mnistTest.reset();
+
+            Evaluation eval = new Evaluation(outputNum);
+            while(dataIterTest.hasNext()){
+                DataSet ds = dataIterTest.next();
+                INDArray output = model.output(ds.getFeatureMatrix(), false);
+                eval.eval(ds.getLabels(), output);
+            }
+            System.out.println(eval.stats());
+            dataIterTest.reset();
         }
 //        log.info("****************Example finished********************");
 

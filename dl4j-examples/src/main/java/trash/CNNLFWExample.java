@@ -49,6 +49,7 @@ import org.datavec.image.recordreader.ImageRecordReader;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import static org.deeplearning4j.examples.dataExamples.ImagePipelineExample.randNumGen;
 import static org.deeplearning4j.examples.feedforward.regression.RegressionMathFunctions.iterations;
+import org.nd4j.linalg.factory.Nd4j;
 
 /**
  * Reference: architecture partially based on DeepFace: http://mmlab.ie.cuhk.edu.hk/pdf/YiSun_CVPR14.pdf
@@ -69,7 +70,7 @@ public class CNNLFWExample {
         try {
             int nChannels = 3;
             
-            File parentDir = new File("C:\\Users\\acastano\\Downloads\\lfw\\lfw\\lfw");
+            File parentDir = new File("C:\\Users\\acastano\\Downloads\\lfw");
             String[] allowedExtensions = new String[]{"jpg"};
             FileSplit filesInDir = new FileSplit(parentDir, allowedExtensions, randNumGen);
             ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
@@ -80,19 +81,21 @@ public class CNNLFWExample {
             InputSplit trainData = filesInDirSplit[0];
             InputSplit testData = filesInDirSplit[1];
             
+//            int tam = 28;
             
-            ImageRecordReader recordReader = new ImageRecordReader(28, 28, nChannels, labelMaker);
-            int outputNum = 5749;
+              final int numRows = 40;
+            final int numColumns = 40;
             
+            int outputNum = 20; // 5749;
+            ImageRecordReader recordReader = new ImageRecordReader(numRows, numColumns, nChannels, labelMaker);
             recordReader.initialize(trainData);
-            org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 28 * 28 * nChannels+1, outputNum);
+            ImageRecordReader recordReaderTest = new ImageRecordReader(numRows, numColumns, nChannels, labelMaker);
+            recordReaderTest.initialize(testData);
             
-            int contador = 0;
-//            while (dataIter.hasNext()) {
-//               DataSet ds =  dataIter.next();
-//               System.out.println(ds);
-//                contador++;                
-//            }
+            
+            org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, numRows*numColumns *nChannels, outputNum);
+            org.nd4j.linalg.dataset.api.iterator.DataSetIterator dataIterTest = new RecordReaderDataSetIterator(recordReaderTest, 10, numRows*numColumns*nChannels, outputNum);
+            
             
             System.out.println("Num Clases: "+dataIter.getLabels().size());
             int seed = 0;
@@ -103,8 +106,7 @@ public class CNNLFWExample {
             
             
             
-            final int numRows = 40;
-            final int numColumns = 40;
+          
 //            int nChannels = 3;
 //            int outputNum = LFWLoader.SUB_NUM_LABELS;
 //            int numSamples = LFWLoader.SUB_NUM_IMAGES-4;
@@ -170,7 +172,7 @@ public class CNNLFWExample {
                             .build())
                     .layer(4, new DenseLayer.Builder()
                             .name("ffn1")
-                            .nOut(160)
+                            .nOut(10)
                             .dropOut(0.5)
                             .build())
                     .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
@@ -180,32 +182,28 @@ public class CNNLFWExample {
                     .backprop(true).pretrain(false);
             new ConvolutionLayerSetup(builder,numRows,numColumns,nChannels);
             
-            MultiLayerNetwork model = new MultiLayerNetwork(builder.build());
-            model.init();
+            MultiLayerConfiguration conf = builder.build();
+        MultiLayerNetwork model = new MultiLayerNetwork(conf);
+        model.init();
+
+
+//        log.info("Train model....");
+        model.setListeners(new ScoreIterationListener(1));
+            int nEpochs = 2;
             
-//            log.info("Train model....");
-            model.setListeners(Arrays.asList((IterationListener) new ScoreIterationListener(listenerFreq)));
-            
-            org.nd4j.linalg.dataset.api.iterator.DataSetIterator lfw = dataIter;
-            
-            while(lfw.hasNext()) {
-                lfwNext = lfw.next();
-                lfwNext.scale();
-                trainTest = lfwNext.splitTestAndTrain(splitTrainNum, new Random(seed)); // train set that is the result
-                trainInput = trainTest.getTrain(); // get feature matrix and labels for training
-                testInput.add(trainTest.getTest().getFeatureMatrix());
-                testLabels.add(trainTest.getTest().getLabels());
-                model.fit(trainInput);
+            Nd4j.ENFORCE_NUMERICAL_STABILITY = true;
+        for( int i=0; i<nEpochs; i++ ) {
+            model.fit(dataIter);
+
+            Evaluation eval = new Evaluation(outputNum);
+            while(dataIterTest.hasNext()){
+                DataSet ds = dataIterTest.next();
+                INDArray output = model.output(ds.getFeatureMatrix(), false);
+                eval.eval(ds.getLabels(), output);
             }
-            
-//            log.info("Evaluate model....");
-            Evaluation eval = new Evaluation(lfw.getLabels());
-            for(int i = 0; i < testInput.size(); i++) {
-                INDArray output = model.output(testInput.get(i));
-                eval.eval(testLabels.get(i), output);
-            }
-            INDArray output = model.output(testInput.get(0));
-            eval.eval(testLabels.get(0), output);
+            System.out.println(eval.stats());
+            dataIterTest.reset();
+        }
 //            log.info(eval.stats());
 //            log.info("****************Example finished********************");
         } catch (IOException ex) {
