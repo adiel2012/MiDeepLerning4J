@@ -70,7 +70,7 @@ public class CNNLFWExample {
             
             
              int batchSize = 30;   // numSamples/10;
-            int iterations = 50;
+            int iterations = 50000;
             int splitTrainNum = (int) (batchSize * .8);
 //            int seed = 123;
             int listenerFreq = iterations / 5;
